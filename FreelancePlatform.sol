@@ -17,20 +17,24 @@ contract FreelancePlatform is Events {
         OwnerAddress = msg.sender;
     }
 
-    function createJob() {}
+    function createJob(string calldata description, uint payment, uint deadline) public payable {
 
-    function applyForJob() {}
+    }
 
-    function approveFreelancer() {}
+    function applyForJob(uint jobID) public {
 
-    function submitWork() {}
+    }
 
-    function approvePayment() {}
+    function approveFreelancer(uint jobID, address freelancer) public {}
 
-    function openDispute() {}
+    function submitWork() public {}
 
-    function resolveDispute() {}
+    function approvePayment() public {}
 
-    function refund() {}
+    function openDispute() public {}
+
+    function resolveDispute() public {}
+
+    function refund() public {}
 
 }

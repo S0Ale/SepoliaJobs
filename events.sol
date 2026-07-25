@@ -4,9 +4,9 @@ pragma solidity >=0.8.2 <0.9.0;
 abstract contract Events {
 
     event FreelancerApplied(
-        uint256 indexed jobId,
+        uint indexed jobID,
         address indexed freelancer,
-        uint256 timestamp
+        uint timestamp
     );
 
 }

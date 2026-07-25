@@ -17,8 +17,8 @@ struct Job {
     address payable client;
     address payable freelancer;
 
+    string desc;
     uint payment;
-
     uint deadline;
 
     JobState state;

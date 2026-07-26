@@ -24,8 +24,13 @@ contract FreelancePlatform is Events {
     }
 
     //TODO: for now only the owner can settle disputes
-    modifier onlyMod() {
-        require(msg.sender == OwnerAddress);
+    modifier modOnly() {
+        require(msg.sender == OwnerAddress, "The user is not a moderator");
+        _;
+    }
+
+    modifier clientOnly(uint _jobID) {
+        require(msg.sender == jobs[_jobID].client, "The user is not the job's client");
         _;
     }
 
@@ -34,12 +39,17 @@ contract FreelancePlatform is Events {
         _;
     }
 
+    modifier openJob(uint _jobID) {
+        require(jobs[_jobID].state == JobState.Open, "The specified job cannot be applied to");
+        _;
+    }
+
     //TODO: for now I use this to check job's expiration
     modifier notExpired(uint _jobID) {
-        JobState state = jobs[_jobID].state;
-        require(jobs[_jobID].state != JobState.Expired, "The specified job's deadline is expired");
-        if((state == JobState.Open || state == JobState.Assigned) && block.timestamp <= jobs[_jobID].deadline) {
-            jobs[_jobID].state = JobState.Expired;
+        Job storage job = jobs[_jobID];
+        require(job.state != JobState.Expired, "The specified job's deadline is expired");
+        if((job.state == JobState.Open || job.state == JobState.Assigned) && block.timestamp >= job.deadline) {
+            job.state = JobState.Expired;
             revert DeadlineExpired(_jobID);
         }
         _;
@@ -50,11 +60,11 @@ contract FreelancePlatform is Events {
     }
 
     function createJob(string calldata description, uint deadline) public payable {
-        require(msg.value >= 0 ether, "The payment should be greater than 0");
-        require(block.timestamp >= deadline, "The deadline cannot be a past date");
-        
+        require(msg.value > 0, "The payment should be greater than 0");
+        require(block.timestamp < deadline, "The deadline cannot be a past date");
+
         jobs[nextjobID] = Job({
-            id: nextjobID++,
+            id: nextjobID,
             client: payable(msg.sender),
             freelancer: payable(address(0)),
             desc: description,
@@ -62,56 +72,79 @@ contract FreelancePlatform is Events {
             deadline: deadline,
             state: JobState.Open
         });
+        nextjobID++;
 
         //TODO: event for job creation?
     }
 
-    function applyToJob(uint jobID) public validJob(jobID) notExpired(jobID) {
-        require(jobs[jobID].state == JobState.Open, "The specified job cannot be applied to");
+    function applyToJob(uint jobID) public validJob(jobID) notExpired(jobID) openJob(jobID) {
+        require(msg.sender != jobs[jobID].client, "A client cannot apply to its own job");
         emit FreelancerApplied(jobID, msg.sender, block.timestamp);
     }
 
     //TODO: check that this validJob check is useful, maybe I can remove it and use it only for applyToJob
-    function approveFreelancer(uint jobID, address freelancer) public validJob(jobID) notExpired(jobID) {
-        require(msg.sender == jobs[jobID].client, "The user is not the job's client");
-        require(jobs[jobID].freelancer == payable(address(0)), "Cannot approve more than one freelancer for a job");
+    function approveFreelancer(uint jobID, address freelancer) public validJob(jobID) notExpired(jobID) openJob(jobID) clientOnly(jobID) {
+        Job storage job = jobs[jobID];
+        require(job.freelancer == payable(address(0)), "Cannot approve more than one freelancer for a job");
 
-        jobs[jobID].freelancer = payable(freelancer);
-        jobs[jobID].state = JobState.Assigned;
+        job.freelancer = payable(freelancer);
+        job.state = JobState.Assigned;
     }
 
     function submitWork(uint jobID) public notExpired(jobID) {
-        require(jobs[jobID].state == JobState.Assigned, "The job hasn't been assigned yet");
-        require(jobs[jobID].freelancer == msg.sender, "You are not assigned to this job");
-        jobs[jobID].state = JobState.Submitted;
+        Job storage job = jobs[jobID];
+
+        require(job.state == JobState.Assigned, "The job hasn't been assigned yet");
+        require(msg.sender == job.freelancer, "You are not assigned to this job");
+        job.state = JobState.Submitted;
     }
 
-    function approvePayment(uint jobID) public noReentrancy {
-        require(address(this).balance >= jobs[jobID].payment);
-        require(jobs[jobID].state == JobState.Submitted, "Nothing has been submitted yet");
+    function approvePayment(uint jobID) public noReentrancy clientOnly(jobID) {
+        Job storage job = jobs[jobID];
 
-        (bool success, ) = jobs[jobID].freelancer.call{value: jobs[jobID].payment}("");
+        require(address(this).balance >= job.payment);
+        require(job.state == JobState.Submitted, "Nothing has been submitted yet");
+
+        (bool success, ) = job.freelancer.call{value: job.payment}("");
         require(success, "The payment to the freelancer has failed");
 
-        jobs[jobID].state = JobState.Completed;
+        job.state = JobState.Completed;
     }
 
     function openDispute(uint jobID) public {
-        require(jobs[jobID].state == JobState.Submitted, "Nothing has been submitted yet");
-        require(msg.sender == jobs[jobID].client || msg.sender == jobs[jobID].freelancer, "The user must be the job's client or freelancer");
+        Job storage job = jobs[jobID];
 
-        jobs[jobID].state = JobState.Disputed;
+        require(job.state == JobState.Submitted, "Nothing has been submitted yet");
+        require(msg.sender == job.client || msg.sender == job.freelancer, "The user must be the job's client or freelancer");
+
+        job.state = JobState.Disputed;
+        emit DisputeOpened(jobID, msg.sender, block.timestamp);
     }
 
-    function settle(uint jobID, bool isClient) public noReentrancy onlyMod {
-        require(address(this).balance >= jobs[jobID].payment);
-        require(jobs[jobID].state == JobState.Disputed, "The job is not being disputed");
+    //TODO: maybe the involved users can put comments in the dispute?
+    function commentDispute(uint jobID, string calldata text) public {
+        Job storage job = jobs[jobID];
 
-        address recipient = isClient ? jobs[jobID].client : jobs[jobID].freelancer;
-        (bool success, ) = recipient.call{value: jobs[jobID].payment}("");
+        require(job.state == JobState.Disputed, "The job is not being disputed");
+        require(msg.sender == job.client || msg.sender == job.freelancer || msg.sender == OwnerAddress, "The user must be the job's client, freelancer or a moderator");
+
+        emit DisputeComment(jobID, msg.sender, text, block.timestamp);
+    }
+
+    //TODO: add a function to send the proofs? stored where? maybe use IPFS but only off-chain
+
+    function settle(uint jobID, bool isClient) public noReentrancy modOnly {
+        Job storage job = jobs[jobID];
+
+        require(address(this).balance >= job.payment);
+        require(job.state == JobState.Disputed, "The job is not being disputed");
+
+        address payable recipient = isClient ? job.client : job.freelancer;
+        (bool success, ) = recipient.call{value: job.payment}("");
         require(success, "The refund to the recipient has failed");
 
-        jobs[jobID].state = JobState.Settled;
+        job.state = JobState.Settled;
+        emit DisputeClosed(jobID, isClient, block.timestamp);
     }
 
 }

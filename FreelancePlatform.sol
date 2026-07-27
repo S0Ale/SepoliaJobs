@@ -59,7 +59,7 @@ contract FreelancePlatform is Events {
         OwnerAddress = msg.sender;
     }
 
-    function createJob(string calldata description, uint deadline) public payable {
+    function createJob(string memory description, uint deadline) public payable {
         require(msg.value > 0, "The payment should be greater than 0");
         require(block.timestamp < deadline, "The deadline cannot be a past date");
 

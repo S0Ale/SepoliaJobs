@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity >=0.8.2 <0.9.0;
 
-import "data.sol";
-import "events.sol";
-import "errors.sol";
+import "./data.sol";
+import "./events.sol";
+import "./errors.sol";
 
 contract FreelancePlatform is Events {
 

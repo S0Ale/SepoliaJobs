@@ -6,6 +6,11 @@
 deps/
 states/
 
+node_modules/
+cache/
+
+package-lock.json
+
 # Debug info
 *.dbg.json
 *.tsbuildinfo

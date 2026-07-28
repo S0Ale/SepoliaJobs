@@ -35,7 +35,7 @@ contract JobCreationTests is PlatformTest {
         c.createJob{value: 100}("Test", 4000000000);
 
         (, , , , , , JobState state) = c.jobs(testJobID);
-        assertEq(uint(state), uint(JobState.Open), "The job should be created successfully");
+        assertEq(uint(state), uint(JobState.Open), "The job should be in the Open state");
     }
 
     function testValueIsZero() public {
@@ -59,6 +59,7 @@ contract JobCreationTests is PlatformTest {
 
 }
 
+// TODO: finish to test other modifiers
 contract ApplicationTests is PlatformTest {
 
     function setUp() public override {
@@ -74,6 +75,18 @@ contract ApplicationTests is PlatformTest {
         assertTrue(true, "The test has executed successfully");
     }
 
+    function testJobNotOpen() public {
+        vm.prank(client);
+        c.approveFreelancer(testJobID, freelancer);
+
+        vm.prank(freelancer);
+        try c.applyToJob(testJobID) {
+            assertTrue(false, "The call should have failed");
+        } catch Error(string memory reason) {
+            assertEq(reason, "The specified job cannot be applied to", "An unknown error occurred");
+        }
+    }
+
     function testApplicantIsClient() public {
         vm.prank(client);
         try c.applyToJob(testJobID) {
@@ -84,7 +97,22 @@ contract ApplicationTests is PlatformTest {
     }
 
     function testApproveFreelancer() public {
-        
+        vm.prank(client);
+        c.approveFreelancer(testJobID, freelancer);
+
+        (, , , , , , JobState state) = c.jobs(testJobID);
+        assertEq(uint(state), uint(JobState.Assigned), "The job should be in the Assigned state");
+    }
+
+    function testFreelancerAlreadyApproved() public {
+        testApproveFreelancer();
+
+        vm.prank(client);
+        try c.approveFreelancer(testJobID, freelancer) {
+            assertTrue(false, "The call should have failed");
+        } catch Error(string memory reason) {
+            assertEq(reason, "Cannot approve more than one freelancer for a job", "An unknown error occurred");
+        }
     }
 
 }

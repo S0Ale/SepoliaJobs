@@ -39,11 +39,6 @@ contract FreelancePlatform is Events {
         _;
     }
 
-    modifier openJob(uint _jobID) {
-        require(jobs[_jobID].state == JobState.Open, "The specified job cannot be applied to");
-        _;
-    }
-
     //TODO: for now I use this to check job's expiration
     modifier notExpired(uint _jobID) {
         Job storage job = jobs[_jobID];
@@ -77,13 +72,17 @@ contract FreelancePlatform is Events {
         //TODO: event for job creation?
     }
 
-    function applyToJob(uint jobID) public validJob(jobID) notExpired(jobID) openJob(jobID) {
-        require(msg.sender != jobs[jobID].client, "A client cannot apply to its own job");
+    function applyToJob(uint jobID) public validJob(jobID) notExpired(jobID) {
+        Job storage job = jobs[jobID];
+
+        require(msg.sender != job.client, "A client cannot apply to its own job");
+        require(job.state == JobState.Open, "The specified job cannot be applied to");
+
         emit FreelancerApplied(jobID, msg.sender, block.timestamp);
     }
 
     //TODO: check that this validJob check is useful, maybe I can remove it and use it only for applyToJob
-    function approveFreelancer(uint jobID, address freelancer) public validJob(jobID) notExpired(jobID) openJob(jobID) clientOnly(jobID) {
+    function approveFreelancer(uint jobID, address freelancer) public validJob(jobID) notExpired(jobID) clientOnly(jobID) {
         Job storage job = jobs[jobID];
         require(job.freelancer == payable(address(0)), "Cannot approve more than one freelancer for a job");
 
@@ -141,7 +140,7 @@ contract FreelancePlatform is Events {
 
         address payable recipient = isClient ? job.client : job.freelancer;
         (bool success, ) = recipient.call{value: job.payment}("");
-        require(success, "The refund to the recipient has failed");
+        require(success, "The transfer to the recipient has failed");
 
         job.state = JobState.Settled;
         emit DisputeClosed(jobID, isClient, block.timestamp);

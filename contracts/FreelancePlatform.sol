@@ -45,7 +45,7 @@ contract FreelancePlatform is Events {
         require(job.state != JobState.Expired, "The specified job's deadline is expired");
         if((job.state == JobState.Open || job.state == JobState.Assigned) && block.timestamp >= job.deadline) {
             job.state = JobState.Expired;
-            revert DeadlineExpired(_jobID);
+            revert("The specified job's deadline is expired");
         }
         _;
     }

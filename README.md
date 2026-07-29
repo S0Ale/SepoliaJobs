@@ -13,7 +13,7 @@ First start the local blockchain environment using `npx hardhat node`.
 ### Local node
 Using `scripts/deploy.js` script in the **localhost** network with the command:
 ```bash
-npx hardhat run scripts/deploy.js --build-profile production --network localhost
+npx hardhat run scripts/deploy.js --network localhost
 ```
 
 ### Sepolia

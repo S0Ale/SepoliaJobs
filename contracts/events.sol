@@ -1,7 +1,14 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity >=0.8.2 <0.9.0;
 
+import "./data.sol";
+
 abstract contract Events {
+
+    event JobCreated(
+        Job job,
+        uint indexed timestamp
+    );
 
     event FreelancerApplied(
         uint indexed jobID,
@@ -19,7 +26,7 @@ abstract contract Events {
         uint indexed jobID,
         address indexed author,
         string text,
-        uint timestamp
+        uint indexed timestamp
     );
 
     event DisputeClosed(

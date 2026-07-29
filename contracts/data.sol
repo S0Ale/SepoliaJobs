@@ -3,7 +3,6 @@ pragma solidity >=0.8.2 <0.9.0;
 
 enum JobState {
     Open,
-    Expired,
     Assigned,
     Submitted,
     Disputed,
@@ -17,6 +16,7 @@ struct Job {
     address payable client;
     address payable freelancer;
 
+    string title;
     string desc;
     uint payment;
     uint deadline;

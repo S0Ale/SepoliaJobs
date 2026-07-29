@@ -39,14 +39,8 @@ contract FreelancePlatform is Events {
         _;
     }
 
-    //TODO: for now I use this to check job's expiration
     modifier notExpired(uint _jobID) {
-        Job storage job = jobs[_jobID];
-        require(job.state != JobState.Expired, "The specified job's deadline is expired");
-        if((job.state == JobState.Open || job.state == JobState.Assigned) && block.timestamp >= job.deadline) {
-            job.state = JobState.Expired;
-            revert("The specified job's deadline is expired");
-        }
+        require(block.timestamp < jobs[_jobID].deadline, "The specified job's deadline is expired");
         _;
     }
 
@@ -54,22 +48,24 @@ contract FreelancePlatform is Events {
         OwnerAddress = msg.sender;
     }
 
-    function createJob(string memory description, uint deadline) public payable {
+    function createJob(string calldata title, string calldata description, uint deadline) public payable {
         require(msg.value > 0, "The payment should be greater than 0");
         require(block.timestamp < deadline, "The deadline cannot be a past date");
 
-        jobs[nextjobID] = Job({
+        Job memory newJob = Job({
             id: nextjobID,
             client: payable(msg.sender),
             freelancer: payable(address(0)),
+            title: title,
             desc: description,
             payment: msg.value,
             deadline: deadline,
             state: JobState.Open
         });
+        jobs[nextjobID] = newJob;
         nextjobID++;
 
-        //TODO: event for job creation?
+        emit JobCreated(newJob, block.timestamp);
     }
 
     function applyToJob(uint jobID) public validJob(jobID) notExpired(jobID) {

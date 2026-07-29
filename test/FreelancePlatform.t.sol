@@ -32,15 +32,15 @@ contract JobCreationTests is PlatformTest {
 
     function testCreateJob() public {
         vm.prank(client);
-        c.createJob{value: 100}("Test", 4000000000);
+        c.createJob{value: 100}("Test", "A test", 4000000000);
 
-        (, , , , , , JobState state) = c.jobs(testJobID);
+        (, , , , , , , JobState state) = c.jobs(testJobID);
         assertEq(uint(state), uint(JobState.Open), "The job should be in the Open state");
     }
 
     function testValueIsZero() public {
         vm.prank(client);
-        try c.createJob("Test", 4000000000) {
+        try c.createJob("Test", "A test", 4000000000) {
             assertTrue(false, "The call should have failed");
         } catch Error(string memory reason) {
             assertEq(reason, "The payment should be greater than 0", "An unknown error occurred");
@@ -49,7 +49,7 @@ contract JobCreationTests is PlatformTest {
 
     function testDeadlineIsPast() public {
         vm.prank(client);
-        try c.createJob{value: 100}("Test", 1) {
+        try c.createJob{value: 100}("Test", "A test", 1) {
             assertTrue(false, "The call should have failed");
         } catch Error(string memory reason) {
             assertEq(reason, "The deadline cannot be a past date", "An unknown error occurred");
@@ -64,7 +64,7 @@ contract ApplicationTests is PlatformTest {
         super.setUp();
 
         vm.prank(client);
-        c.createJob{value: 100}("Test", 4000000000);
+        c.createJob{value: 100}("Test", "A test", 4000000000);
     }
 
     function testApplyToJob() public {
@@ -75,7 +75,7 @@ contract ApplicationTests is PlatformTest {
 
     function testApplyToExpiredJob() public {
         vm.prank(client);
-        c.createJob{value: 100}("Test", block.timestamp + 1 days);
+        c.createJob{value: 100}("Test", "A test", block.timestamp + 1 days);
 
         vm.warp(block.timestamp + 1 days);
 
@@ -121,7 +121,7 @@ contract ApplicationTests is PlatformTest {
         vm.prank(client);
         c.approveFreelancer(testJobID, freelancer);
 
-        (, , , , , , JobState state) = c.jobs(testJobID);
+        (, , , , , , , JobState state) = c.jobs(testJobID);
         assertEq(uint(state), uint(JobState.Assigned), "The job should be in the Assigned state");
     }
 
@@ -138,7 +138,7 @@ contract ApplicationTests is PlatformTest {
 
     function testApproveExpiredJob() public {
         vm.prank(client);
-        c.createJob{value: 100}("Test", block.timestamp + 1 days);
+        c.createJob{value: 100}("Test", "A test", block.timestamp + 1 days);
 
         vm.warp(block.timestamp + 1 days);
 

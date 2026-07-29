@@ -97,7 +97,7 @@ contract FreelancePlatform is Events {
     function approvePayment(uint jobID) public noReentrancy clientOnly(jobID) {
         Job storage job = jobs[jobID];
 
-        require(address(this).balance >= job.payment);
+        assert(address(this).balance >= job.payment);
         require(job.state == JobState.Submitted, "Nothing has been submitted yet");
 
         (bool success, ) = job.freelancer.call{value: job.payment}("");
@@ -131,7 +131,7 @@ contract FreelancePlatform is Events {
     function settle(uint jobID, bool isClient) public noReentrancy modOnly {
         Job storage job = jobs[jobID];
 
-        require(address(this).balance >= job.payment);
+        assert(address(this).balance >= job.payment);
         require(job.state == JobState.Disputed, "The job is not being disputed");
 
         address payable recipient = isClient ? job.client : job.freelancer;

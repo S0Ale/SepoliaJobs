@@ -58,7 +58,6 @@ contract JobCreationTests is PlatformTest {
 
 }
 
-// TODO: finish to test other modifiers
 contract ApplicationTests is PlatformTest {
 
     function setUp() public override {

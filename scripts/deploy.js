@@ -1,4 +1,5 @@
 import { network } from "hardhat";
+import { addJobs } from "./interact.js"
 
 const { ethers, networkName } = await network.create();
 
@@ -11,3 +12,5 @@ await c.waitForDeployment();
 
 console.log("Contract address:", await c.getAddress());
 console.log("Deployment successful!");
+
+await addJobs(ethers, c)

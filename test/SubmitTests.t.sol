@@ -19,7 +19,7 @@ contract SubmitTests is PlatformTest {
         vm.prank(freelancer);
         c.submitWork(testJobID);
 
-        (, , , , , , , JobState state) = c.jobs(testJobID);
+        (, , , , , , JobState state) = c.jobs(testJobID);
         assertEq(uint(state), uint(JobState.Submitted), "The job should be in the Submitted state");
     }
 
@@ -36,7 +36,7 @@ contract SubmitTests is PlatformTest {
             assertEq(reason, "The specified job's deadline is expired");
         }
     }
-    
+
     function testSubmitAsNotFreelancer() public {
         vm.prank(client);
         try c.submitWork(testJobID) {

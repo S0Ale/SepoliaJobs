@@ -11,8 +11,6 @@ enum JobState {
 }
 
 struct Job {
-    uint id;
-
     address payable client;
     address payable freelancer;
 

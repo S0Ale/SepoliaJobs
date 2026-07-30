@@ -53,7 +53,6 @@ contract FreelancePlatform is Events {
         require(block.timestamp < deadline, "The deadline cannot be a past date");
 
         Job memory newJob = Job({
-            id: nextjobID,
             client: payable(msg.sender),
             freelancer: payable(address(0)),
             title: title,
@@ -63,9 +62,9 @@ contract FreelancePlatform is Events {
             state: JobState.Open
         });
         jobs[nextjobID] = newJob;
-        nextjobID++;
 
-        emit JobCreated(newJob, block.timestamp);
+        emit JobCreated(nextjobID, newJob, block.timestamp);
+        nextjobID++;
     }
 
     function applyToJob(uint jobID) public validJob(jobID) notExpired(jobID) {

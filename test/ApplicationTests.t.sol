@@ -66,7 +66,7 @@ contract ApplicationTests is PlatformTest {
         vm.prank(client);
         c.approveFreelancer(testJobID, freelancer);
 
-        (, , , , , , , JobState state) = c.jobs(testJobID);
+        (, , , , , , JobState state) = c.jobs(testJobID);
         assertEq(uint(state), uint(JobState.Assigned), "The job should be in the Assigned state");
     }
 

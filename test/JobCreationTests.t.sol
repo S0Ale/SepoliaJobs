@@ -9,7 +9,7 @@ contract JobCreationTests is PlatformTest {
         vm.prank(client);
         c.createJob{value: 100}("Test", "A test", 4000000000);
 
-        (, , , , , , , JobState state) = c.jobs(testJobID);
+        (, , , , , , JobState state) = c.jobs(testJobID);
         assertEq(uint(state), uint(JobState.Open), "The job should be in the Open state");
     }
 

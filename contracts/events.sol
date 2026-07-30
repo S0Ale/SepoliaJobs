@@ -6,6 +6,7 @@ import "./data.sol";
 abstract contract Events {
 
     event JobCreated(
+        uint indexed jobID,
         Job job,
         uint indexed timestamp
     );

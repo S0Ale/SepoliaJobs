@@ -22,7 +22,7 @@ contract ApprovalTests is PlatformTest {
         vm.prank(client);
         c.approvePayment(testJobID);
 
-        (, , , , , , , JobState state) = c.jobs(testJobID);
+        (, , , , , , JobState state) = c.jobs(testJobID);
         assertEq(uint(state), uint(JobState.Completed), "The job should be in the Completed state");
     }
 

@@ -22,7 +22,7 @@ contract DisputeTests is PlatformTest {
         vm.prank(client);
         c.openDispute(testJobID);
 
-        (, , , , , , , JobState state) = c.jobs(testJobID);
+        (, , , , , , JobState state) = c.jobs(testJobID);
         assertEq(uint(state), uint(JobState.Disputed), "The job should be in the Disputed state");
     }
 
@@ -51,14 +51,14 @@ contract DisputeTests is PlatformTest {
         vm.prank(client);
         c.openDispute(testJobID);
 
-        (, address client, address freelancer, , , uint payment, , ) = c.jobs(testJobID);
+        (address client, address freelancer, , , uint payment, , ) = c.jobs(testJobID);
         address recipient = isClient ? client : freelancer;
         uint prevBalance = recipient.balance;
 
         vm.prank(owner);
         c.settle(testJobID, isClient);
 
-        (, , , , , , , JobState state) = c.jobs(testJobID);
+        (, , , , , , JobState state) = c.jobs(testJobID);
         assertEq(uint(state), uint(JobState.Settled), "The job should be in the Settled state");
         assertEq(recipient.balance, prevBalance + payment, "The recipient has not received the payment");
     }

@@ -11,6 +11,8 @@ cache/
 
 package-lock.json
 
+new_contract.sh
+
 # Debug info
 *.dbg.json
 *.tsbuildinfo

@@ -2,15 +2,18 @@ import { network } from "hardhat";
 
 const { ethers, networkName } = await network.create();
 
-const accounts = await ethers.provider.send("eth_accounts");
+const addr = process.env.ADDR;
+const eth = ethers.parseEther("5");
 
-const tenEth = "0x8AC7230489E80000"; // 10 ETH in wei
+const sender = (await ethers.getSigners())[1];
 
-for (const account of accounts) {
-    await ethers.provider.send("hardhat_setBalance", [
-        account,
-        tenEth,
-    ]);
+const tx = await sender.sendTransaction({
+    to: addr,
+    value: eth,
+});
+await tx.wait();
 
-    console.log(`Funded ${account} with 10 ETH`);
-}
+await ethers.provider.send("hardhat_setBalance", [
+    sender.address,
+    ethers.toBeHex(eth * 2n),
+]);

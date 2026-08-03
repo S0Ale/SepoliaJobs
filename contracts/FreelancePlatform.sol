@@ -34,6 +34,7 @@ contract FreelancePlatform is Events {
         _;
     }
 
+    // NOTE (DanieleErcole): A job is valid for sure if job.state != Open, because that is the default value for the enum
     modifier validJob(uint _jobID) {
         require(_jobID > invalidJobID && _jobID < nextjobID, "The specified job does not exists");
         _;
@@ -67,6 +68,18 @@ contract FreelancePlatform is Events {
         nextjobID++;
     }
 
+    function deleteJob(uint jobID) public notExpired(jobID) clientOnly(jobID) noReentrancy {
+        Job storage job = jobs[jobID];
+
+        assert(address(this).balance >= job.payment);
+        require(job.state == JobState.Open, "An assigned job cannot be deleted");
+
+        (bool success, ) = job.client.call{value: job.payment}("");
+        require(success, "The refund to the client has failed");
+
+        job.state = JobState.Deleted;
+    }
+
     function applyToJob(uint jobID) public validJob(jobID) notExpired(jobID) {
         Job storage job = jobs[jobID];
 
@@ -79,6 +92,7 @@ contract FreelancePlatform is Events {
     //TODO: check that this validJob check is useful, maybe I can remove it and use it only for applyToJob
     function approveFreelancer(uint jobID, address freelancer) public validJob(jobID) notExpired(jobID) clientOnly(jobID) {
         Job storage job = jobs[jobID];
+        require(job.state != JobState.Deleted, "Interaction with a deleted job");
         require(job.freelancer == payable(address(0)), "Cannot approve more than one freelancer for a job");
 
         job.freelancer = payable(freelancer);

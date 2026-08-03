@@ -6,11 +6,14 @@ import "./PlatformTestBase.sol";
 contract JobCreationTests is PlatformTest {
 
     function testCreateJob() public {
+        uint prevBalance = client.balance;
+
         vm.prank(client);
         c.createJob{value: 100}("Test", "A test", 4000000000);
 
-        (, , , , , , JobState state) = c.jobs(testJobID);
+        (, , , , uint payment, , JobState state) = c.jobs(testJobID);
         assertEq(uint(state), uint(JobState.Open), "The job should be in the Open state");
+        assertEq(client.balance, prevBalance - payment, "The client's payment has not been deducted from their balance");
     }
 
     function testValueIsZero() public {
@@ -28,6 +31,46 @@ contract JobCreationTests is PlatformTest {
             assertTrue(false, "The call should have failed");
         } catch Error(string memory reason) {
             assertEq(reason, "The deadline cannot be a past date", "An unknown error occurred");
+        }
+    }
+
+    function testDeleteJob() public {
+        testCreateJob();
+        uint prevBalance = client.balance;
+
+        vm.prank(client);
+        c.deleteJob(testJobID);
+
+        (, , , , uint payment, , JobState state) = c.jobs(testJobID);
+        assertEq(uint(state), uint(JobState.Deleted), "The job should be in the Deleted state");
+        assertEq(client.balance, prevBalance + payment, "The freelancer has not received the refund");
+    }
+
+    function testDeleteAsNotClient() public {
+        testCreateJob();
+
+        vm.prank(freelancer);
+        try c.deleteJob(testJobID) {
+            assertTrue(false, "The call should have failed");
+        } catch Error(string memory reason) {
+            assertEq(reason, "The user is not the job's client", "An unknown error occurred");
+        }
+    }
+
+    function testDeleteAnAssignedJob() public {
+        testCreateJob();
+
+        vm.prank(client);
+        c.approveFreelancer(testJobID, freelancer);
+
+        vm.prank(freelancer);
+        c.submitWork(testJobID);
+
+        vm.prank(client);
+        try c.deleteJob(testJobID) {
+            assertTrue(false, "The call should have failed");
+        } catch Error(string memory reason) {
+            assertEq(reason, "An assigned job cannot be deleted", "An unknown error occurred");
         }
     }
 

@@ -19,11 +19,14 @@ contract ApprovalTests is PlatformTest {
     }
 
     function testApprovePayment() public {
+        uint prevBalance = freelancer.balance;
+
         vm.prank(client);
         c.approvePayment(testJobID);
 
-        (, , , , , , JobState state) = c.jobs(testJobID);
+        (, , , , uint payment, , JobState state) = c.jobs(testJobID);
         assertEq(uint(state), uint(JobState.Completed), "The job should be in the Completed state");
+        assertEq(freelancer.balance, prevBalance + payment, "The freelancer has not received the payment");
     }
 
     function testApproveAsFreelancer() public {

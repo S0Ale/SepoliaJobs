@@ -7,7 +7,8 @@ enum JobState {
     Submitted,
     Disputed,
     Completed,
-    Settled
+    Settled,
+    Deleted
 }
 
 struct Job {

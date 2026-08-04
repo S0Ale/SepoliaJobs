@@ -3,42 +3,38 @@ pragma solidity >=0.8.2 <0.9.0;
 
 import "./data.sol";
 
-abstract contract Events {
+event JobCreated(
+    uint indexed jobID,
+    uint indexed timestamp
+);
 
-    event JobCreated(
-        uint indexed jobID,
-        Job job,
-        uint indexed timestamp
-    );
+event FreelancerApplied(
+    uint indexed jobID,
+    address indexed freelancer,
+    uint indexed timestamp
+);
 
-    event FreelancerApplied(
-        uint indexed jobID,
-        address indexed freelancer,
-        uint indexed timestamp
-    );
+event WorkSubmitted(
+    uint indexed jobID,
+    uint indexed timestamp
+);
 
-    event WorkSubmitted(
-        uint indexed jobID,
-        uint indexed timestamp
-    );
+event DisputeOpened(
+    uint indexed jobID,
+    address indexed opener,
+    uint indexed timestamp
+);
 
-    event DisputeOpened(
-        uint indexed jobID,
-        address indexed opener,
-        uint indexed timestamp
-    );
+event DisputeComment(
+    uint indexed jobID,
+    address indexed author,
+    string text,
+    uint indexed timestamp
+);
 
-    event DisputeComment(
-        uint indexed jobID,
-        address indexed author,
-        string text,
-        uint indexed timestamp
-    );
+event DisputeClosed(
+    uint indexed jobID,
+    bool isClient,
+    uint indexed timestamp
+);
 
-    event DisputeClosed(
-        uint indexed jobID,
-        bool isClient,
-        uint indexed timestamp
-    );
-
-}

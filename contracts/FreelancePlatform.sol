@@ -5,7 +5,7 @@ import "./data.sol";
 import "./events.sol";
 import "./errors.sol";
 
-contract FreelancePlatform is Events {
+contract FreelancePlatform {
 
     uint constant invalidJobID = 0;
     address immutable OwnerAddress;

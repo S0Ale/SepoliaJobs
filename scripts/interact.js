@@ -12,7 +12,7 @@ async function addJobs(ethers, contract){
 		const tx = await contract.connect(deployer).createJob(
 			job.title,
 			job.description,
-			job.deadline,
+			BigInt(job.deadline),
 			{ value: ethers.parseEther(job.payment) }
 		);
 		await tx.wait();

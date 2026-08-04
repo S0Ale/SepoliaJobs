@@ -14,13 +14,18 @@ abstract contract Events {
     event FreelancerApplied(
         uint indexed jobID,
         address indexed freelancer,
-        uint timestamp
+        uint indexed timestamp
+    );
+
+    event WorkSubmitted(
+        uint indexed jobID,
+        uint indexed timestamp
     );
 
     event DisputeOpened(
         uint indexed jobID,
         address indexed opener,
-        uint timestamp
+        uint indexed timestamp
     );
 
     event DisputeComment(
@@ -33,7 +38,7 @@ abstract contract Events {
     event DisputeClosed(
         uint indexed jobID,
         bool isClient,
-        uint timestamp
+        uint indexed timestamp
     );
 
 }

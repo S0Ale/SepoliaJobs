@@ -13,7 +13,7 @@ contract FreelancePlatform is Events {
     uint public nextjobID = invalidJobID + 1;
     mapping(uint => Job) public jobs;
 
-    bool public locked;
+    bool locked;
 
     modifier noReentrancy() {
         require(!locked, "No reentrancy");
@@ -104,7 +104,9 @@ contract FreelancePlatform is Events {
 
         require(job.state == JobState.Assigned, "The job hasn't been assigned yet");
         require(msg.sender == job.freelancer, "You are not assigned to this job");
+
         job.state = JobState.Submitted;
+        emit WorkSubmitted(jobID, block.timestamp);
     }
 
     function approvePayment(uint jobID) public noReentrancy clientOnly(jobID) {

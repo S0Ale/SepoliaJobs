@@ -64,7 +64,7 @@ contract FreelancePlatform {
         });
         jobs[nextjobID] = newJob;
 
-        emit JobCreated(nextjobID, newJob, block.timestamp);
+        emit JobCreated(nextjobID, block.timestamp);
         nextjobID++;
     }
 

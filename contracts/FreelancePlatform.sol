@@ -80,6 +80,18 @@ contract FreelancePlatform {
         job.state = JobState.Deleted;
     }
 
+    function tryRefund(uint jobID) public clientOnly(jobID) noReentrancy {
+        Job storage job = jobs[jobID];
+
+        assert(address(this).balance >= job.payment);
+        require(block.timestamp >= jobs[jobID].deadline, "The specified job's deadline is not expired yet");
+
+        (bool success, ) = job.client.call{value: job.payment}("");
+        require(success, "The refund to the client has failed");
+
+        job.state = JobState.Deleted;
+    }
+
     function applyToJob(uint jobID) public validJob(jobID) notExpired(jobID) {
         Job storage job = jobs[jobID];
 

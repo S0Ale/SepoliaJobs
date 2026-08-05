@@ -74,4 +74,41 @@ contract JobCreationTests is PlatformTest {
         }
     }
 
+    function testRefund() public {
+        vm.prank(client);
+        c.createJob{value: 100}("Test", "A test", block.timestamp + 1 days);
+
+        uint prevBalance = client.balance;
+        vm.warp(block.timestamp + 2 days);
+
+        vm.prank(client);
+        c.tryRefund(testJobID);
+
+        (, , , , uint payment, , JobState state) = c.jobs(testJobID);
+        assertEq(uint(state), uint(JobState.Deleted), "The job should be in the Open state");
+        assertEq(client.balance, prevBalance + payment, "The client has not been refunded");
+    }
+
+    function testRefundAsNotClient() public {
+        testCreateJob();
+
+        vm.prank(freelancer);
+        try c.tryRefund(testJobID) {
+            assertTrue(false, "The call should have failed");
+        } catch Error(string memory reason) {
+            assertEq(reason, "The user is not the job's client", "An unknown error occurred");
+        }
+    }
+
+    function testRefundNotExpiredJob() public {
+        testCreateJob();
+
+        vm.prank(client);
+        try c.tryRefund(testJobID) {
+            assertTrue(false, "The call should have failed");
+        } catch Error(string memory reason) {
+            assertEq(reason, "The specified job's deadline is not expired yet", "An unknown error occurred");
+        }
+    }
+
 }

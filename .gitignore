@@ -12,6 +12,7 @@ cache/
 package-lock.json
 
 new_contract.sh
+contract-address.json
 
 # Debug info
 *.dbg.json

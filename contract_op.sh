@@ -29,4 +29,4 @@ if [ -z "$ID" ]; then
     ID=1
 fi
 
-OP=$OP ID=$ID ADDR=$ADDR npx hardhat run scripts/contract_op.js --network localhost
+OP=$OP ID=$ID ADDR=$ADDR npx hardhat run scripts/contract_op.js --build-profile production --network localhost

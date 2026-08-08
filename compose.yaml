@@ -11,6 +11,11 @@ services:
         volumes:
             - ./api/database.sql:/docker-entrypoint-initdb.d/init.sql:ro
 
+    blockchain:
+        build: ./contract
+        ports:
+            - "8545:8545"
+
     api:
         build: ./api
         ports:
@@ -24,4 +29,11 @@ services:
             DB_NAME: "files"
             PSW: "abcde"
             USER: "files"
-            RPC_URL: "http://127.0.0.1:8545/"
+            RPC_URL: "http://blockchain:8545/"
+
+    web:
+        build: ./frontend
+        ports:
+            - "3000:3000"
+        depends_on:
+            - api

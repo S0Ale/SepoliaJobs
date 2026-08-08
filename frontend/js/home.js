@@ -1,0 +1,78 @@
+import Alpine from 'https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/module.esm.js'
+import { loginGate, returnToLogin } from './login-module.js'
+import { shortenAddress, getType, JobState, call, baseModal } from './util.js'
+import { setup, getJobs, createJob } from './contract-module.js'
+
+let user = {address: '', balance: ''}
+let jobs = []
+let userJobs = []
+let deletedJobs = []
+
+async function listJobs(alljobs=true, userjobs=false){
+	if(alljobs) jobs = await getJobs(user.provider, 10)
+	if(userjobs){
+		userJobs = jobs.filter((job) => getType(user.address, job) !== null)
+		deletedJobs = userJobs.filter((job) => job.state == JobState.Deleted)
+		userJobs = userJobs.filter((job) => !deletedJobs.some(djob => djob.id === job.id))
+	}
+	jobs = jobs.filter((job) => !userJobs.some(userjob => userjob.id === job.id))
+	jobs = jobs.filter((job) => job.state == JobState.Open)
+
+	if(alljobs) Alpine.store('jobs', jobs)
+	if(userjobs){
+		Alpine.store('userjobs', userJobs)
+		Alpine.store('deletedjobs', deletedJobs)
+	}
+}
+
+document.addEventListener('alpine:init', () => {
+	Alpine.store('deletedjobs', [])
+
+	Alpine.data('jobtemplate', () => ({
+		formatDate: (timestamp) => { return (new Date(Number(timestamp)*1000)).toDateString() },
+		getJobType: (job) => { return getType(user.address, job) },
+		redirectJob: (job) => { window.location.href = `/job.html?id=${job.id}`;return; },
+	}))
+
+	Alpine.data('account', () => ({
+		balance: user.balance,
+		formattedAddr: shortenAddress(user.address),
+
+		async init(){
+			user = await loginGate(true)
+			if (!user) {
+				returnToLogin()
+				return
+			}
+			setup(user.provider, user.signer)
+			this.balance = user.balance
+			this.formattedAddr = shortenAddress(user.address)
+
+			await listJobs(true, true)
+			Alpine.store("loading", false)
+		}
+	}))
+
+	Alpine.data('newjobmodal', () => baseModal({ // override submit function
+		async submit(){
+			let form = document.querySelector("#create-job")
+			let data = new FormData(form)
+			let date = data.get('deadline')
+			data.delete('deadline')
+			data.append('deadline', Math.floor(new Date(date).getTime() / 1000))
+
+			try{
+                await call(async () => await createJob(user.address, data))
+				this.openmodal = false
+				await listJobs(true, true)
+			}catch(e){
+				console.error(e)
+				this.modalerror = true
+				this.errormsg = e.reason ||
+					e.shortMessage ||                    // short summary
+					e.info?.error?.message ||            // provider errors
+					e.data?.message || 'Transaction failed'
+			}
+		}
+	}))
+})

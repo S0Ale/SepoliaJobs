@@ -6,13 +6,16 @@
 deps/
 states/
 
-node_modules/
-cache/
+**/node_modules/
+**/cache/
 
-package-lock.json
+**/package-lock.json
 
-new_contract.sh
-contract-address.json
+contract/new_contract.sh
+contract/contract-address.json
+frontend/start-webserver.sh
+frontend/caddyfile
+frontend/res/
 
 # Debug info
 *.dbg.json

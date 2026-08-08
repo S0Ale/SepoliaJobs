@@ -1,0 +1,17 @@
+/submissions/:jobid
+    GET -> get the job's file submissions if present
+        Request query params:
+            address: string
+        Response body:
+            file_ids: string[]
+        errors:
+            403 -> Unauthorized
+            404 -> Job not found
+    POST -> upload job submission
+        Request body:
+            address: string,
+            file_ids: string[]
+        errors:
+            400 -> Invalid file ids
+            403 -> Unauthorized
+            404 -> Job not found

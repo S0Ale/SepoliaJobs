@@ -1,0 +1,27 @@
+name: freelance_platform
+
+services:
+    db:
+        image: postgres:latest
+        environment:
+            POSTGRES_USER: "files"
+            POSTGRES_PASSWORD: "abcde"
+        ports:
+            - "5432:5432"
+        volumes:
+            - ./api/database.sql:/docker-entrypoint-initdb.d/init.sql:ro
+
+    api:
+        build: ./api
+        ports:
+            - "4000:4000"
+        depends_on:
+            - db
+        environment:
+            PORT: "4000"
+            DB_HOST: "db"
+            DB_PORT: "5432"
+            DB_NAME: "files"
+            PSW: "abcde"
+            USER: "files"
+            RPC_URL: "http://127.0.0.1:8545/"

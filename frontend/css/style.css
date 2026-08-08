@@ -1,0 +1,114 @@
+@import url(./variable.css);
+@import url(./reset.css);
+
+.col-1 {width: 8.33%;}
+.col-2 {width: 16.66%;}
+.col-3 {width: 25%;}
+.col-4 {width: 33.33%;}
+.col-5 {width: 41.66%;}
+.col-6 {width: 50%;}
+.col-7 {width: 58.33%;}
+.col-8 {width: 66.66%;}
+.col-9 {width: 75%;}
+.col-10 {width: 83.33%;}
+.col-11 {width: 91.66%;}
+.col-12 {width: 100%;}
+
+.layerneg{z-index: -1;}
+.layer0{z-index: 0;}
+.layer1{z-index: 1;}
+.layer2{z-index: 2;}
+.layer1000{z-index: 1000;}
+.layer2000{z-index: 2000;}
+.layer3000{z-index: 3000;}
+
+.debug1{border: 1px solid red;}
+.debug2{border: 1px solid blue;}
+.debug3{border: 1px solid green;}
+.debug4{border: 1px solid aqua;}
+
+:root{
+	font-family: var(--text-family);
+}
+
+h1, h2, h3{
+	font-family: var(--title-family);
+}
+
+.transparent{
+	background: transparent;
+}
+
+.noselect{
+	-webkit-touch-callout: none; /* iOS Safari */
+	-webkit-user-select: none; /* Safari */
+	-khtml-user-select: none; /* Konqueror HTML */
+	-moz-user-select: none; /* Old versions of Firefox */
+	-ms-user-select: none; /* Internet Explorer/Edge */
+	user-select: none;
+}
+
+/* ------ */
+
+body{
+	background: var(--bgnd);
+	color: var(--text);
+}
+
+.margin{
+	background-color: var(--bgnd);
+	background-attachment: fixed;
+	background-size: 10px 10px;
+	background-image: repeating-linear-gradient(315deg,var(--pattern-fg) 0,var(--pattern-fg) 1px,transparent 0,transparent 50%);
+}
+
+.sector{
+	border-bottom: 1px solid var(--border);
+	border-top: 1px solid var(--border);
+}
+
+.seg-title{
+	transition: all .25s;
+}
+.segment:hover .seg-title{
+	color: var(--main)
+}
+
+.std-button{
+	color: white;
+	background: var(--main);
+	border: 1px solid var(--border);
+	transition: background-color 0.25s
+}
+.std-button:hover{
+	background: var(--main-light);
+}
+.btn-inactive{
+	filter: grayscale(100%);
+	pointer-events: none;
+}
+
+.danger-button{
+	color: white;
+	background: var(--danger-bg);
+	border: 1px solid var(--border);
+	transition: background-color 0.25s
+}
+.danger-button:hover{
+	background: var(--danger-bg-light);
+}
+
+.job-card{
+	background: var(--bgnd);
+	border: 1px solid var(--border);
+}
+.job-card h3{
+	color: oklch(70.7% 0.022 261.325);
+	transition: color .25s;
+}
+.job-card:hover h3{
+	color: var(--text)
+}
+.job-card:hover div h3+span{
+	color: var(--main)
+}
